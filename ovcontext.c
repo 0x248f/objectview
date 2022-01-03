@@ -27,8 +27,9 @@ void ovcontext_step(ovcontext *ctx) {
 			obj->next = ovobject_copy(obj);
 			obj->next->previous = obj;
 			obj->next->time_index = obj->time_index + 1;
-			ctx->step_function(obj);
+			ctx->step_function(obj->next);
 			ctx->ov->t_max++;
+			ov->object = obj->next;
 		}
 	} else {
 		ov->object = ov->object->next;

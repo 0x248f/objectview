@@ -70,7 +70,6 @@ void ov_update(objectview *ov) {
 	ovobject *obj = ov->object;
 	double max = 0, val;
 	int height, width, depth, k = ov->current_slice;
-	printf("%d\n", k);
 
 	if (obj == NULL)
 		return;

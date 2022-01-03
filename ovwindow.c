@@ -36,11 +36,15 @@ void *ovwindow_sdl_loop(void *nullp) {
 			ovwindow_destroy(ovw);
 			if (window_list == NULL) {
 				SDL_Quit();
-				exit(0);
+				return NULL;
 			}
 		}
 		if (event.type == SDL_KEYDOWN) {
 			switch (event.key.keysym.sym) {
+			case SDLK_SPACE:
+				ovcontext_toggle_running(ovw->context);
+				ovwindow_update(ovw);
+				break;
 			case SDLK_UP:
 				ov_slice_up(ovw->context->ov);
 				ovwindow_update(ovw);
@@ -50,11 +54,11 @@ void *ovwindow_sdl_loop(void *nullp) {
 				ovwindow_update(ovw);
 				break;
 			case SDLK_RIGHT:
-				ovcontext_step();
+				ovcontext_step(ovw->context);
 				ovwindow_update(ovw);
 				break;
 			case SDLK_LEFT:
-				ovcontext_step_back();
+				ovcontext_step_back(ovw->context);
 				ovwindow_update(ovw);
 				break;
 			default:
@@ -62,6 +66,8 @@ void *ovwindow_sdl_loop(void *nullp) {
 			}
 		}
 	}
+
+	return NULL;
 }
 
 // One thread per window
