@@ -40,8 +40,11 @@ ovobject *ovobject_load(const char *path) {
 	obj->data_size = obj->x*obj->y*obj->z;
 	obj->data = malloc(obj->data_size*sizeof(double));
 	for (uint i = 0; i < t; i++) {
-		if (i != t - 1)
+		if (i != t - 1) {
 			temp->next = ovobject_copy(obj);
+			temp->next->next = NULL;
+			temp->next->previous = temp;
+		}
 		
 		for (uint j = 0; j < obj->data_size; j++)
 			if (fscanf(f, "%lf", &(temp->data[j])) == -1)
@@ -130,8 +133,8 @@ uint64_t ovobject_max_time(ovobject *obj) {
 		;
 
 	uint64_t i;
-	for (i = 0; temp != NULL; temp = temp->next, i++)
-		;
+	for (i = 0; temp != NULL; temp = temp->next)
+		i++;
 
 	return i;
 }
