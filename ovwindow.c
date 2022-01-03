@@ -1,4 +1,5 @@
 #include <sys/queue.h>
+#include <signal.h>
 #include <stdlib.h>
 
 #include "objectview.h"
@@ -131,16 +132,20 @@ ovwindow *ovwindow_create(const char *name, objectview *ov) {
 }
 
 void ovwindow_destroy(ovwindow *ovw) {
+	// Stopping the thread
+	pthread_cancel(ovw->thread);
+
+	// Freeing memory
 	SDL_DestroyRenderer(ovw->renderer);
 	SDL_DestroyWindow(ovw->window);
 	free(ovw);
 
-	// Remove from the window list
+	// Removing from the window list
 	if (window_list != NULL && ovw == window_list->ovw) {
 		window_list = window_list->next;
 		return;
 	}
-	
+
 	ovw_list *temp;
 	for (temp = window_list; temp->next != NULL; temp = temp->next)
 		if (temp->next->ovw == ovw) {
