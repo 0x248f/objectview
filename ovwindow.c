@@ -79,7 +79,6 @@ void *ovwindow_action_loop(void *ovw_voidp) {
 		if (ctx->running) {
 			ovcontext_step(ctx);
 			ovwindow_update(ovw);
-			SDL_RenderPresent(ovw->renderer);
 			SDL_Delay(ctx->delay);
 		} else {
 			SDL_Delay(250);
@@ -111,9 +110,11 @@ ovwindow *ovwindow_create(const char *name, objectview *ov) {
 	pthread_create(&ovw->thread, NULL, ovwindow_action_loop, ovw);
 
 	SDL_Rect rect = {0, 0, X, Y};
+	pthread_mutex_lock(&ovw->mutex);
 	SDL_SetRenderTarget(ovw->renderer, NULL);
 	SDL_SetRenderDrawColor(ovw->renderer, 0, 0, 0, 0);
 	SDL_RenderFillRect(ovw->renderer, &rect);
+	pthread_mutex_unlock(&ovw->mutex);
 
 	// Add to window list
 	ovw_list *temp, *entry = malloc(sizeof(window_list));
@@ -136,8 +137,10 @@ void ovwindow_destroy(ovwindow *ovw) {
 	pthread_cancel(ovw->thread);
 
 	// Freeing memory
+	pthread_mutex_lock(&ovw->mutex);
 	SDL_DestroyRenderer(ovw->renderer);
 	SDL_DestroyWindow(ovw->window);
+	pthread_mutex_unlock(&ovw->mutex);
 	free(ovw);
 
 	// Removing from the window list
@@ -160,6 +163,8 @@ void ovwindow_update(ovwindow *ovw) {
 	objectview *ov = ovw->context->ov;
 	ov_update(ov);
 
+	pthread_mutex_lock(&ovw->mutex);
+
 	int X = ov->width*ov->point_size, Y = ov->height*ov->point_size + action_bar_height;
 	ovw->width = X;
 	ovw->height = Y;
@@ -181,4 +186,6 @@ void ovwindow_update(ovwindow *ovw) {
 	}
 
 	SDL_RenderPresent(ovw->renderer);
+
+	pthread_mutex_unlock(&ovw->mutex);
 }
