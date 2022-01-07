@@ -12,7 +12,10 @@ int main(int argc, char **argv) {
 		path = argv[1];
 
 	ovobject *obj = ovobject_load(path);
+	if (obj == NULL)
+		return -1;
 	objectview *ov = ov_create(obj);
 	ovwindow *ovw = ovwindow_create(path, ov);
+	ovw->context->delay = 400;
 	ovwindow_sdl_loop(NULL);
 }

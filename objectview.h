@@ -6,7 +6,7 @@
 
 typedef struct ovobject {
 	double *data;
-	uint64_t data_size, x, y, z; // data_size = x*y*z*sizeof(double)
+	uint64_t data_size, x, y, z; // data_size = x*y*z
 	struct ovobject *previous, *next; // This is the time dimension
 	uint32_t time_index;
 } ovobject;
@@ -68,15 +68,47 @@ void ovcontext_toggle_running(ovcontext *ctx);
 void ovcontext_step(ovcontext *ctx);
 void ovcontext_step_back(ovcontext *ctx);
 
+typedef struct ovwindow ovwindow;
+
+struct ovbutton;
+typedef void (*ovbutton_function)(struct ovbutton *button);
+typedef struct ovbutton {
+	ovwindow *parent;
+	char *label;
+	uint32_t x, y, width, height;
+	ovbutton_function function;
+} ovbutton;
+
+ovbutton *ovbutton_create(ovwindow *parent, const char *label, ovbutton_function function);
+void ovbutton_destroy(ovbutton *button);
+void ovbutton_draw(ovbutton *button);
+void ovbutton_process_event(ovbutton *button, SDL_Event *event);
+
 typedef struct {
+	ovwindow *parent;
+	uint32_t x, y, width, height;
+	ovbutton *buttons[6];
+	ovbutton *play_button, *pov_button,
+		*step_button, *step_back_button,
+		*slice_up_button, *slice_down_button;
+} ovbar;
+
+ovbar *ovbar_create(ovwindow *parent, uint64_t height);
+void ovbar_destroy(ovbar *bar);
+void ovbar_update(ovbar *bar);
+void ovbar_draw(ovbar *bar);
+void ovbar_process_event(ovbar *bar, SDL_Event *e);
+
+struct ovwindow {
 	ovcontext *context;
+	ovbar *bar;
 
 	SDL_Window *window;
-	uint16_t width, height;
+	uint32_t width, height;
 	SDL_Renderer *renderer;
 	pthread_t thread;
 	pthread_mutex_t mutex;
-} ovwindow;
+};
 
 ovwindow *ovwindow_create(const char *name, objectview *ov);
 void ovwindow_destroy(ovwindow *ovw); // Frees the argument

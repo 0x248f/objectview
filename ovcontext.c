@@ -30,7 +30,8 @@ void ovcontext_step(ovcontext *ctx) {
 			ctx->step_function(obj->next);
 			ctx->ov->t_max++;
 			ov->object = obj->next;
-		}
+		} else
+			ctx->running = false;
 	} else {
 		ov->object = ov->object->next;
 	}

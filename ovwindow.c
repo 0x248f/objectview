@@ -1,4 +1,3 @@
-#include <sys/queue.h>
 #include <signal.h>
 #include <stdlib.h>
 
@@ -10,7 +9,6 @@ typedef struct ovw_list {
 } ovw_list;
 
 ovw_list *window_list = NULL;
-int action_bar_height = 140;
 
 ovwindow *ovwindow_from_windowID(uint32_t windowID) {
 	ovw_list *entry;
@@ -25,6 +23,7 @@ ovwindow *ovwindow_from_windowID(uint32_t windowID) {
 void *ovwindow_sdl_loop(void *nullp) {
 	SDL_Event event;
 	ovwindow *ovw;
+	ovbar *bar;
 
 	while (true) {
 		SDL_PollEvent(&event); // TODO: check sdl window id against ovwindows (store them in a linked list)
@@ -32,6 +31,11 @@ void *ovwindow_sdl_loop(void *nullp) {
 		ovw = ovwindow_from_windowID(event.window.windowID);
 		if (ovw == NULL)
 			continue;
+
+		bar = ovw->bar;
+
+		if (event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP)
+			ovbar_process_event(bar, &event);
 
 		if (event.type == SDL_QUIT) {
 			ovwindow_destroy(ovw);
@@ -43,24 +47,19 @@ void *ovwindow_sdl_loop(void *nullp) {
 		if (event.type == SDL_KEYDOWN) {
 			switch (event.key.keysym.sym) {
 			case SDLK_SPACE:
-				ovcontext_toggle_running(ovw->context);
-				ovwindow_update(ovw);
+			        bar->play_button->function(bar->play_button);
 				break;
 			case SDLK_UP:
-				ov_slice_up(ovw->context->ov);
-				ovwindow_update(ovw);
+			        bar->slice_up_button->function(bar->slice_up_button);
 				break;
 			case SDLK_DOWN:
-				ov_slice_down(ovw->context->ov);
-				ovwindow_update(ovw);
+			        bar->slice_down_button->function(bar->slice_down_button);
 				break;
 			case SDLK_RIGHT:
-				ovcontext_step(ovw->context);
-				ovwindow_update(ovw);
+				bar->step_button->function(bar->step_button);
 				break;
 			case SDLK_LEFT:
-				ovcontext_step_back(ovw->context);
-				ovwindow_update(ovw);
+				bar->step_back_button->function(bar->step_back_button);
 				break;
 			default:
 				break;
@@ -88,10 +87,6 @@ void *ovwindow_action_loop(void *ovw_voidp) {
 	}
 }
 
-void draw_action_bar(ovwindow *ovw) {
-	// TODO: Draw buttons for the action bar and keep their position in a struct placed in ovw
-}
-
 ovwindow *ovwindow_create(const char *name, objectview *ov) {
 	if (ov == NULL || ov->object == NULL)
 		return NULL;
@@ -100,9 +95,10 @@ ovwindow *ovwindow_create(const char *name, objectview *ov) {
 	memset(ovw, 0, sizeof(ovwindow));
 	ovw->context = ovcontext_create(name);
 	ovw->context->ov = ov;
+	ovw->bar = ovbar_create(ovw, 150);
 	ov->point_size = 4;
 
-	int X = ov->width*ov->point_size, Y = ov->height*ov->point_size + action_bar_height;
+	int X = ov->width*ov->point_size, Y = ov->height*ov->point_size + ovw->bar->height;
 	ovw->window = SDL_CreateWindow(ovw->context->name, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, X, Y, SDL_WINDOW_SHOWN);
 	ovw->renderer = SDL_CreateRenderer(ovw->window, -1, SDL_RENDERER_ACCELERATED);
 	// TODO: Check for error creating window or renderer
@@ -137,6 +133,8 @@ void ovwindow_destroy(ovwindow *ovw) {
 	pthread_cancel(ovw->thread);
 
 	// Freeing memory
+	ovbar_destroy(ovw->bar);
+
 	pthread_mutex_lock(&ovw->mutex);
 	SDL_DestroyRenderer(ovw->renderer);
 	SDL_DestroyWindow(ovw->window);
@@ -162,10 +160,11 @@ void ovwindow_destroy(ovwindow *ovw) {
 void ovwindow_update(ovwindow *ovw) {
 	objectview *ov = ovw->context->ov;
 	ov_update(ov);
+	ovbar_draw(ovw->bar);
 
 	pthread_mutex_lock(&ovw->mutex);
 
-	int X = ov->width*ov->point_size, Y = ov->height*ov->point_size + action_bar_height;
+	int X = ov->width*ov->point_size, Y = ov->height*ov->point_size + ovw->bar->height;
 	ovw->width = X;
 	ovw->height = Y;
 	SDL_SetWindowSize(ovw->window, X, Y);
