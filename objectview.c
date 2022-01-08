@@ -27,14 +27,15 @@ void ov_slice_down(objectview *ov) {
 void ov_lut_colour(objectview *ov, double val, SDL_Colour *colour) {
 	uint8_t r, g, b;
 	uint32_t rgb;
+	double ratio = (val-ov->min_value)/(ov->max_value-ov->min_value);
 
 	switch (ov->lut_type) {
 	default:
 	case OV_LUT_GREY_SCALE:
-		r = g = b = 0xff*(val/ov->max_value);
+		r = g = b = 0xff*ratio;
 		break;
 	case OV_LUT_RGB_SCALE:
-		rgb = 0xffffff*(val/ov->max_value);
+		rgb = 0xffffff*ratio;
 		r = (rgb >> 16)&0xff;
 		g = (rgb >> 8)&0xff;
 		b = rgb&0xff;
@@ -68,7 +69,7 @@ double ov_get_value(objectview *ov, int i, int j, int k) {
 
 void ov_update(objectview *ov) {
 	ovobject *obj = ov->object;
-	double max = 0, val;
+	double max = 0, min = 0, val;
 	int height, width, depth, k = ov->current_slice;
 
 	if (obj == NULL)
@@ -103,8 +104,11 @@ void ov_update(objectview *ov) {
 
 			if (val > max)
 				max = val;
+			if ((i == 0 && j == 0) || val < min)
+				min = val;
 		}
 	}
 
 	ov->max_value = max;
+	ov->min_value = min;
 }

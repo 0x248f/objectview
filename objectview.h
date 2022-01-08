@@ -4,6 +4,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct ovobject {
 	double *data;
 	uint64_t data_size, x, y, z; // data_size = x*y*z
@@ -42,7 +46,7 @@ typedef struct objectview {
 	uint64_t height, width, depth, current_slice;
         uint32_t t_max;
 	uint8_t point_size;
-	double max_value;
+	double max_value, min_value;
 } objectview;
 
 objectview *ov_create(ovobject *obj);
@@ -114,3 +118,7 @@ ovwindow *ovwindow_create(const char *name, objectview *ov);
 void ovwindow_destroy(ovwindow *ovw); // Frees the argument
 void ovwindow_update(ovwindow *ovw);
 void *ovwindow_sdl_loop(void *nullp);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif

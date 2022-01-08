@@ -47,6 +47,7 @@ char *pov_button_label(objectview *ov) {
 void povf(ovbutton *b) {
 	objectview *ov = b->parent->context->ov;
 	ov->view_type = (ov->view_type + 1)%3;
+	ov->current_slice = 0;
 	b->label = pov_button_label(ov);
 	ovwindow_update(b->parent);
 }
