@@ -32,11 +32,6 @@ void *ovwindow_sdl_loop(void *nullp) {
 		if (ovw == NULL)
 			continue;
 
-		bar = ovw->bar;
-
-		if (event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP)
-			ovbar_process_event(bar, &event);
-
 		if (event.type == SDL_QUIT) {
 			ovwindow_destroy(ovw);
 			if (window_list == NULL) {
@@ -44,8 +39,18 @@ void *ovwindow_sdl_loop(void *nullp) {
 				return NULL;
 			}
 		}
+
+		bar = ovw->bar;
+
+		if (event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP)
+			ovbar_process_event(bar, &event);
+
 		if (event.type == SDL_KEYDOWN) {
 			switch (event.key.keysym.sym) {
+			case SDLK_q:
+				ovwindow_destroy(ovw);
+				SDL_Quit();
+				return NULL;
 			case SDLK_SPACE:
 			        bar->play_button->function(bar->play_button);
 				break;
