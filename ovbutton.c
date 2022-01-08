@@ -26,6 +26,9 @@ void ovbutton_process_event(ovbutton *button, SDL_Event *event) {
 
 	SDL_MouseButtonEvent *be = &event->button;
 	if ((be->x >= button->x && be->x <= button->x + button->width) &&
-	    (be->y >= button->y && be->y <= button->y + button->height))
+	    (be->y >= button->y && be->y <= button->y + button->height)) {
+		pthread_mutex_lock(&button->parent->mutex);
 		button->function(button);
+		pthread_mutex_unlock(&button->parent->mutex);
+	}
 }

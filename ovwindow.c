@@ -41,6 +41,7 @@ void *ovwindow_sdl_loop(void *nullp) {
 		}
 
 		bar = ovw->bar;
+		pthread_mutex_lock(&ovw->mutex);
 
 		if (event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP)
 			ovbar_process_event(bar, &event);
@@ -48,6 +49,7 @@ void *ovwindow_sdl_loop(void *nullp) {
 		if (event.type == SDL_KEYDOWN) {
 			switch (event.key.keysym.sym) {
 			case SDLK_q:
+				pthread_mutex_unlock(&ovw->mutex);
 				ovwindow_destroy(ovw);
 				SDL_Quit();
 				return NULL;
@@ -70,6 +72,9 @@ void *ovwindow_sdl_loop(void *nullp) {
 				break;
 			}
 		}
+
+		pthread_mutex_unlock(&ovw->mutex);
+		ovwindow_update(ovw);
 	}
 
 	return NULL;
@@ -81,11 +86,12 @@ void *ovwindow_action_loop(void *ovw_voidp) {
 	ovcontext *ctx = ovw->context;
 	while (true) {
 		if (ctx->running) {
+			pthread_mutex_lock(&ovw->mutex);
 			ovcontext_step(ctx);
-			ovwindow_update(ovw);
+			pthread_mutex_unlock(&ovw->mutex);
 			SDL_Delay(ctx->delay);
 		} else {
-			SDL_Delay(250);
+			SDL_Delay(10);
 		}
 
 		ovwindow_update(ovw);
@@ -163,11 +169,11 @@ void ovwindow_destroy(ovwindow *ovw) {
 }
 
 void ovwindow_update(ovwindow *ovw) {
-	objectview *ov = ovw->context->ov;
-	ov_update(ov);
 	ovbar_draw(ovw->bar);
 
 	pthread_mutex_lock(&ovw->mutex);
+	objectview *ov = ovw->context->ov;
+	ov_update(ov);
 
 	int X = ov->width*ov->point_size, Y = ov->height*ov->point_size + ovw->bar->height;
 	ovw->width = X;

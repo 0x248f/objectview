@@ -28,7 +28,6 @@ void playf(ovbutton *b) {
 		ovcontext_toggle_running(b->parent->context);
 
 	b->label = play_button_label(b->parent->context);
-	ovwindow_update(b->parent);
 }
 
 char *pov_button_label(objectview *ov) {
@@ -49,27 +48,22 @@ void povf(ovbutton *b) {
 	ov->view_type = (ov->view_type + 1)%3;
 	ov->current_slice = 0;
 	b->label = pov_button_label(ov);
-	ovwindow_update(b->parent);
 }
 
 void stepf(ovbutton *b) {
 	ovcontext_step(b->parent->context);
-	ovwindow_update(b->parent);
 }
 
 void stepbackf(ovbutton *b) {
 	ovcontext_step_back(b->parent->context);
-	ovwindow_update(b->parent);
 }
 
 void sliceupf(ovbutton *b) {
 	ov_slice_up(b->parent->context->ov);
-	ovwindow_update(b->parent);
 }
 
 void slicedownf(ovbutton *b) {
 	ov_slice_down(b->parent->context->ov);
-	ovwindow_update(b->parent);
 }
 
 ovbar *ovbar_create(ovwindow *parent, uint64_t height) {
@@ -137,6 +131,4 @@ void ovbar_draw(ovbar *bar) {
 void ovbar_process_event(ovbar *bar, SDL_Event *e) {
 	for (uint i = 0; i < sizeof(bar->buttons)/8; i++)
 		ovbutton_process_event(bar->buttons[i], e);
-
-	ovbar_draw(bar);
 }

@@ -28,6 +28,8 @@ void ov_lut_colour(objectview *ov, double val, SDL_Colour *colour) {
 	uint8_t r, g, b;
 	uint32_t rgb;
 	double ratio = (val-ov->min_value)/(ov->max_value-ov->min_value);
+	if (ov->min_value == ov->max_value && ov->min_value != 0)
+		ratio = 1;
 
 	switch (ov->lut_type) {
 	default:
