@@ -91,7 +91,7 @@ void *ovwindow_action_loop(void *ovw_voidp) {
 			pthread_mutex_unlock(&ovw->mutex);
 			SDL_Delay(ctx->delay);
 		} else {
-			SDL_Delay(10);
+			SDL_Delay(250);
 		}
 
 		ovwindow_update(ovw);
