@@ -1,6 +1,7 @@
 #include <signal.h>
 #include <stdlib.h>
 
+#define _GNU_SOURCE
 #include "objectview.h"
 int pthread_yield(void);
 
@@ -86,7 +87,7 @@ void *ovwindow_action_loop(void *ovw_voidp) {
 	ovwindow *ovw = (ovwindow *)ovw_voidp;
 	ovcontext *ctx = ovw->context;
 	while (true) {
-		pthread_yield();
+		//pthread_yield();
 		if (ctx->running) {
 			pthread_mutex_lock(&ovw->mutex);
 			ovcontext_step(ctx);

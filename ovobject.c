@@ -2,6 +2,20 @@
 
 #include "objectview.h"
 
+ovobject *ovobject_create(int x, int y, int z) {
+	ovobject *obj = malloc(sizeof(ovobject));
+	memset(obj, 0, sizeof(ovobject));
+
+	obj->data = malloc(x*y*z*sizeof(double));
+	obj->x = x;
+	obj->y = y;
+	obj->z = z;
+	obj->data_size = x*y*z;
+	obj->time_index = 0;
+
+	return obj;
+}
+
 void ovobject_save(ovobject *obj, const char *path) {
 	FILE *f = fopen(path, "w");
 	if (f == NULL)

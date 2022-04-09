@@ -16,6 +16,7 @@ typedef struct ovobject {
 } ovobject;
 
 // TODO: Create from various formats
+ovobject *ovobject_create(int x, int y, int z);
 void ovobject_save(ovobject *obj, const char *path);
 ovobject *ovobject_load(const char *path);
 ovobject *ovobject_copy(ovobject *obj);

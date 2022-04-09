@@ -102,12 +102,14 @@ void ov_update(objectview *ov) {
 
 	for (int i = 0; i < width; i++) {
 		for (int j = 0; j < height; j++) {
-		        val = ov_get_value(ov, i, j, k);
+			for (int kk = 0; kk < depth; kk++) {
+				val = ov_get_value(ov, i, j, kk);
 
-			if (val > max)
-				max = val;
-			if ((i == 0 && j == 0) || val < min)
-				min = val;
+				if (val > max)
+					max = val;
+				if ((i == 0 && j == 0) || val < min)
+					min = val;
+			}
 		}
 	}
 
